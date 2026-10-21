@@ -1,0 +1,128 @@
+/* ============================================
+   QR Code Studio — Base CSS
+   Hybrid: local base + Tailwind CDN utilities
+   ============================================ */
+
+:root {
+  --dark-bg: #0b0f19;
+  --card-bg: #151c2c;
+  --panel-bg: #1e293b;
+  --accent: #f59e0b;
+  --accent-hover: #d97706;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
+  --dark-bg: #f8fafc;
+  --card-bg: #ffffff;
+  --panel-bg: #f1f5f9;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--dark-bg);
+  color: #f1f5f9;
+}
+
+body {
+  font-family: inherit;
+  background: var(--dark-bg);
+  color: #f1f5f9;
+  min-height: 100vh;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; background: none; border: none; }
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--accent, #f59e0b);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #334155;
+  height: 2px;
+  border-radius: 9999px;
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }
+
+.checkerboard {
+  background-color: #ffffff;
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Dark-mode card borders */
+html.dark .border-slate-800 { border-color: #1e293b; }
+html.dark .border-slate-700 { border-color: #334155; }
+html.dark .bg-slate-800 { background-color: #1e293b; }
+html.dark .bg-slate-900 { background-color: #0f172a; }
+html.dark .bg-slate-950 { background-color: #020617; }
+html.dark .text-slate-400 { color: #94a3b8; }
+html.dark .text-slate-300 { color: #cbd5e1; }
+html.dark .text-slate-200 { color: #e2e8f0; }
+html.dark .text-slate-100 { color: #f1f5f9; }
+
+/* Light mode overrides */
+html.light .bg-darkBg { background-color: var(--dark-bg); }
+html.light .bg-cardBg { background-color: var(--card-bg); }
+html.light .bg-panelBg { background-color: var(--panel-bg); }
+html.light .text-slate-950 { color: #0f172a; }
+html.light .text-slate-900 { color: #1e293b; }
+html.light .border-slate-800 { border-color: #cbd5e1; }
+html.light .border-slate-700 { border-color: #94a3b8; }
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Utility shims for Tailwind CDN fallback */
+.font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+.text-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }

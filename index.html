@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circular Dot-Matrix QR Studio & Laser Patch Designer</title>
+  <meta name="description" content="Watermark-free QR code generator for laser engraving, patches, caps, and marketing. Export SVG, PNG, and print-ready PDF.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            darkBg: '#0b0f19',
+            cardBg: '#151c2c',
+            panelBg: '#1e293b',
+            accent: '#f59e0b',
+            accentHover: '#d97706'
+          }
+        }
+      }
+    }
+  </script>
+  <script type="module">
+    import { init } from './js/ui.js';
+    window.addEventListener('DOMContentLoaded', () => {
+      window.init();
+    });
+  </script>
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col justify-between p-3 sm:p-5">
+
+  <!-- Header -->
+  <header class="w-full max-w-7xl mx-auto mb-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800/80 pb-3.5">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">Circular Dot-Matrix QR Studio & Laser Patch Designer</h1>
+          <span id="headerMatrixPill" class="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">25×25 Matrix • EC: H (30%)</span>
+        </div>
+        <p class="text-slate-400 text-xs">Generate live custom QR codes or use your uploaded matrix, add circular surrounding dots & center motifs, and export laser-ready SVG.</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+      <button id="btnDownloadSVG" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition transform active:scale-95">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Download SVG File
+      </button>
+      <button id="btnDownloadPNG" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Download High-Res PNG
+      </button>
+      <button id="btnDownloadPDF" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Download PDF
+      </button>
+      <button id="btnCopyLink" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition" title="Copy design link">
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+        Copy Link
+      </button>
+      <button id="btnReset" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Reset Studio
+      </button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-start flex-grow">
+
+    <!-- Left Column: Controls -->
+    <section class="lg:col-span-5 bg-cardBg rounded-2xl border border-slate-800/90 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="p-4 bg-slate-900/90 border-b border-slate-800 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> QR Data Source
+          </span>
+          <div class="inline-flex rounded-lg bg-slate-950 p-0.5 border border-slate-800 text-[11px] font-semibold">
+            <button id="src-btn-live" class="px-2.5 py-1 rounded-md bg-amber-500 text-slate-950 transition">Live Custom URL / Text</button>
+            <button id="src-btn-preset" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-slate-200 transition">Uploaded 25×25 Preset</button>
+          </div>
+        </div>
+
+        <div id="liveInputPanel" class="space-y-2.5">
+          <div class="relative">
+            <select id="qrTypeSelect" class="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1.5 text-[10px] font-semibold rounded bg-slate-800 text-slate-300 border border-slate-700 appearance-none">
+              <option value="url">🔗 URL</option>
+              <option value="text">📝 Text</option>
+              <option value="vcard">👤 vCard</option>
+              <option value="wifi">📶 WiFi</option>
+              <option value="sms">💬 SMS</option>
+              <option value="email">✉️ Email</option>
+              <option value="bitcoin">₿ Bitcoin</option>
+              <option value="calendar">📅 Calendar</option>
+            </select>
+            <input id="qrDataInput" type="text" value="https://example.com" placeholder="Enter URL, website link, vCard, or text..." class="w-full bg-slate-950/90 text-slate-100 placeholder-slate-500 text-xs sm:text-sm rounded-xl pl-3.5 pr-20 py-2.5 border border-slate-700/80 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 transition font-mono"/>
+            <button onclick="clearOrSampleUrl()" class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-[10px] font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">Sample</button>
+          </div>
+
+          <div id="dataForm" class="space-y-2"></div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pt-0.5">
+            <span class="text-[11px] text-slate-400 font-medium">Error Correction (Redundancy):</span>
+            <div class="grid grid-cols-4 gap-1">
+              <button id="ec-btn-L" class="px-2 py-1 rounded text-[11px] font-semibold border border-slate-700 bg-slate-800 text-slate-300 transition" title="7% Redundancy">L (7%)</button>
+              <button id="ec-btn-M" class="px-2 py-1 rounded text-[11px] font-semibold border border-slate-700 bg-slate-800 text-slate-300 transition" title="15% Redundancy">M (15%)</button>
+              <button id="ec-btn-Q" class="px-2 py-1 rounded text-[11px] font-semibold border border-slate-700 bg-slate-800 text-slate-300 transition" title="25% Redundancy">Q (25%)</button>
+              <button id="ec-btn-H" class="px-2 py-1 rounded text-[11px] font-semibold border border-amber-500 bg-amber-500/15 text-amber-300 transition" title="30% Redundancy - Best for Center Cutouts & Logos">H (30% ★)</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="presetInfoPanel" class="hidden bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-amber-300">Using Original Uploaded Matrix:</span>
+            <span class="text-slate-400 block text-[11px]">Exact 25×25 dot pattern (`mauri_round.svg`) • EC Level M (~15%)</span>
+          </div>
+          <button onclick="setDataSource('live')" class="text-[11px] text-amber-400 underline hover:text-amber-300 flex-shrink-0 ml-2">Edit URL Instead</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 border-b border-slate-800 bg-slate-900/50 text-xs font-semibold">
+        <button id="tab-btn-geometry" class="py-2.5 px-2 text-center border-b-2 border-amber-500 text-amber-400 bg-slate-800/40 transition">1. Rotation & Dots</button>
+        <button id="tab-btn-center" class="py-2.5 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">2. Center Space & Motif</button>
+        <button id="tab-btn-style" class="py-2.5 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">3. Patch & Colors</button>
+      </div>
+
+      <div class="p-4 space-y-5 overflow-y-auto custom-scrollbar flex-grow">
+        <div id="tab-geometry" class="space-y-4">
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 space-y-3">
+            <div class="flex justify-between items-center">
+              <label class="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                QR Code Rotation Angle
+              </label>
+              <span id="rotationLabel" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">0°</span>
+            </div>
+            <input id="rotationSlider" type="range" min="0" max="360" value="0" step="1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+            <div class="grid grid-cols-4 gap-1.5 pt-0.5">
+              <button class="py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-slate-300 transition" onclick="setRotation(0)">0° Normal</button>
+              <button class="py-1.5 text-xs font-medium bg-amber-500/10 hover:bg-amber-500/20 rounded-lg border border-amber-500/30 text-amber-300 transition" onclick="setRotation(45)">45° Diamond</button>
+              <button class="py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-slate-300 transition" onclick="setRotation(90)">90°</button>
+              <button class="py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-slate-300 transition" onclick="setRotation(180)">180°</button>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+              <div>
+                <span class="text-xs font-medium text-slate-300">Keep Center Motif Upright</span>
+                <p class="text-[10px] text-slate-400">Rotates the QR matrix while keeping center icon/initials level</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="keepIconUprightToggle" checked class="sr-only peer">
+                <div class="w-9 h-5 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 space-y-3.5">
+            <div>
+              <h3 class="text-xs sm:text-sm font-semibold text-slate-200">Outer Circular Space Dot Fill</h3>
+              <p class="text-[11px] text-slate-400">Fills the 4 circular segments outside the square QR code with matching dots</p>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button id="outer-pat-qr_blend" class="p-2 text-xs rounded-lg border border-amber-500 bg-amber-500/10 text-amber-300 font-medium text-left transition">✦ Random QR Camouflage</button>
+              <button id="outer-pat-tapa_geo" class="p-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left transition">❖ Pacific Tapa Weave</button>
+              <button id="outer-pat-concentric" class="p-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left transition">◎ Concentric Dot Rings</button>
+              <button id="outer-pat-checkerboard" class="p-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left transition">▞ Checkerboard Grid</button>
+              <button id="outer-pat-empty" class="col-span-2 p-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium text-center transition">○ Empty (Clean Quiet Zone Around Square QR)</button>
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300">Outer Circle Extension</span>
+                <span id="badgePaddingLabel" class="text-amber-400 font-mono">+2.0 modules</span>
+              </div>
+              <input id="badgePaddingSlider" type="range" min="0.5" max="6.0" value="2.0" step="0.5" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300">Quiet-Zone Ring Around QR Square</span>
+                <span id="quietZoneLabel" class="text-amber-400 font-mono">4.0 module</span>
+              </div>
+              <input id="quietZoneSlider" type="range" min="0" max="8.0" value="4.0" step="0.5" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+              <p class="text-[10px] text-slate-400">Leaves a gap around the 3 corner finder eyes so phone cameras lock on immediately.</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 space-y-3.5">
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300 font-medium">Dot Radius Scale (% of Module Pitch)</span>
+                <span id="dotRadiusPctLabel" class="text-amber-400 font-mono">47% (94% dia)</span>
+              </div>
+              <input id="dotRadiusSlider" type="range" min="0.30" max="0.50" value="0.47" step="0.01" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-medium text-slate-300">Finder Pattern Style (3 Corners)</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button id="finder-btn-dots" class="py-2 px-3 text-xs rounded-lg border border-amber-500 bg-amber-500/10 text-amber-300 font-medium transition">Dotted 7×7 Original</button>
+                <button id="finder-btn-rounded" class="py-2 px-3 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium transition">Smooth Rounded Square</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-center" class="space-y-4 hidden">
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 space-y-3.5">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-xs sm:text-sm font-semibold text-slate-200">Center Empty Round Space</h3>
+                <p class="text-[11px] text-slate-400">Clears a circular area in the center of the QR matrix</p>
+              </div>
+              <span id="centerHoleLabel" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">3.4 modules</span>
+            </div>
+            <input id="centerHoleSlider" type="range" min="0" max="6.5" value="3.4" step="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+            <div class="pt-2.5 border-t border-slate-800 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold text-slate-200">Ring of Similar Dots Around Center Space</span>
+                  <p class="text-[10px] text-slate-400">Frames the inner empty circle with matching circular dots</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="centerRingToggle" checked class="sr-only peer">
+                  <div class="w-10 h-5 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                </label>
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-300">Inner Ring Dot Count</span>
+                  <span id="centerRingCountLabel" class="text-amber-400 font-mono">18 dots</span>
+                </div>
+                <input id="centerRingCountSlider" type="range" min="8" max="32" value="18" step="2" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 space-y-3">
+            <div>
+              <h3 class="text-xs sm:text-sm font-semibold text-slate-200">Centerpiece Icon / Motif</h3>
+              <p class="text-[11px] text-slate-400">Harmonious with Pacific Islander heritage & Islamic geometric/nature principles</p>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button id="icon-btn-empty" class="p-2 text-xs rounded-xl border border-amber-500 bg-amber-500/10 text-amber-300 font-medium text-left flex items-center gap-2 transition"><span class="w-5 h-5 rounded-full border border-dashed border-current flex items-center justify-center text-[10px]">○</span>Empty Round Space</button>
+              <button id="icon-btn-rub_el_hizb" class="p-2 text-xs rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left flex items-center gap-2 transition"><span class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-xs">۞</span>8-Pt Rub el Hizb Star</button>
+              <button id="icon-btn-moana_wave" class="p-2 text-xs rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left flex items-center gap-2 transition"><span class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-xs">≈</span>Pacific Moana Waves</button>
+              <button id="icon-btn-tapa_diamond" class="p-2 text-xs rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left flex items-center gap-2 transition"><span class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-xs">❖</span>Tapa Diamond Weave</button>
+              <button id="icon-btn-palm_flora" class="p-2 text-xs rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left flex items-center gap-2 transition"><span class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-xs">✿</span>Island Palm / Flora</button>
+              <button id="icon-btn-geo_pin" class="p-2 text-xs rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left flex items-center gap-2 transition"><span class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-xs">◎</span>Compass / Location Pin</button>
+              <button id="icon-btn-custom_text" class="col-span-2 p-2 text-xs rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium text-left flex items-center justify-between transition"><span class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold">AZ</span>Custom Text / Brand Initials (1–3 Letters)</span><span class="text-[10px] text-amber-400 font-mono">Editable below</span></button>
+            </div>
+            <div id="customInitialsBox" class="pt-2 flex items-center gap-2">
+              <label class="text-xs text-slate-300 flex-shrink-0">Center Initials:</label>
+              <input id="centerInitialsInput" type="text" maxlength="3" value="M" placeholder="e.g. M or QR" class="w-full bg-slate-950 text-amber-300 font-bold text-center text-xs rounded-lg px-3 py-1.5 border border-slate-700 focus:border-amber-500 focus:outline-none uppercase tracking-widest"/>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-style" class="space-y-4 hidden">
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 space-y-3">
+            <h3 class="text-xs sm:text-sm font-semibold text-slate-200">Outer Patch Border Ring</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="border-btn-solid" class="py-2 px-2.5 text-xs rounded-lg border border-amber-500 bg-amber-500/10 text-amber-300 font-medium transition">Thin Solid Border</button>
+              <button id="border-btn-dotted" class="py-2 px-2.5 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium transition">Dotted Ring</button>
+              <button id="border-btn-double_stitch" class="py-2 px-2.5 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium transition">Double Leather Stitch</button>
+              <button id="border-btn-none" class="py-2 px-2.5 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium transition">No Outer Border</button>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+              <div>
+                <span class="text-xs font-semibold text-slate-200">Transparent SVG Background</span>
+                <p class="text-[10px] text-slate-400">Export only foreground vector shapes for laser engraving</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="transparentBgToggle" class="sr-only peer">
+                <div class="w-10 h-5 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 space-y-3">
+            <h3 class="text-xs sm:text-sm font-semibold text-slate-200">Material & Color Presets</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="theme-btn-bw" class="p-2 rounded-xl border border-amber-500 bg-slate-800/90 flex items-center gap-2 text-left transition"><span class="w-6 h-6 rounded-full bg-white border-2 border-black flex-shrink-0"></span><div><div class="text-xs font-semibold text-white">Classic B&W</div><div class="text-[10px] text-slate-400">Print / Laser Vector</div></div></button>
+              <button id="theme-btn-tan" class="p-2 rounded-xl border border-slate-700 bg-slate-800/40 flex items-center gap-2 text-left transition"><span class="w-6 h-6 rounded-full bg-[#c89b6e] border-2 border-[#261305] flex-shrink-0"></span><div><div class="text-xs font-semibold text-white">Tan Leather Patch</div><div class="text-[10px] text-slate-400">Laser Engraved</div></div></button>
+              <button id="theme-btn-espresso" class="p-2 rounded-xl border border-slate-700 bg-slate-800/40 flex items-center gap-2 text-left transition"><span class="w-6 h-6 rounded-full bg-[#23160f] border-2 border-[#e6cfa7] flex-shrink-0"></span><div><div class="text-xs font-semibold text-white">Dark Espresso</div><div class="text-[10px] text-slate-400">Light Chiseled Dots</div></div></button>
+              <button id="theme-btn-gold" class="p-2 rounded-xl border border-slate-700 bg-slate-800/40 flex items-center gap-2 text-left transition"><span class="w-6 h-6 rounded-full bg-[#141824] border-2 border-[#f5d061] flex-shrink-0"></span><div><div class="text-xs font-semibold text-white">Inverted Brass</div><div class="text-[10px] text-slate-400">Gold Metallic Badge</div></div></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+              <div class="flex items-center justify-between bg-slate-950/70 px-3 py-2 rounded-lg border border-slate-800"><span class="text-xs text-slate-300">Dots / Foreground</span><input type="color" id="fgColorPicker" value="#000000" class="w-6 h-6 rounded cursor-pointer bg-transparent"/></div>
+              <div class="flex items-center justify-between bg-slate-950/70 px-3 py-2 rounded-lg border border-slate-800"><span class="text-xs text-slate-300">Patch Background</span><input type="color" id="bgColorPicker" value="#ffffff" class="w-6 h-6 rounded cursor-pointer bg-transparent"/></div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 space-y-3">
+            <h3 class="text-xs sm:text-sm font-semibold text-slate-200">Export Settings</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300">PNG Resolution (DPI)</span>
+                <span id="dpiLabel" class="text-amber-400 font-mono">300 DPI</span>
+              </div>
+              <input id="dpiSlider" type="range" min="72" max="600" value="300" step="72" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300">PDF Page Format</span>
+                <span class="text-amber-400 font-mono">A4 / Letter</span>
+              </div>
+              <select id="pdfFormatSelect" class="w-full bg-slate-950 text-slate-100 text-xs rounded-lg pl-3 py-2 border border-slate-700 focus:border-amber-500 focus:outline-none">
+                <option value="A4">A4 (210×297 mm)</option>
+                <option value="Letter">Letter (8.5×11 in)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/95 p-3 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div id="healthDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></div>
+              <span id="healthTitle" class="text-xs font-semibold text-slate-200">Scannability: Optimal</span>
+            </div>
+            <button id="btnReset" class="text-[11px] text-slate-400 hover:text-amber-400 underline">Reset Studio</button>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono border-t border-slate-800/80 pt-1.5">
+            <span id="statMatrixSize">Matrix: 25×25</span>
+            <span id="statRedundancy">EC: H (30%)</span>
+            <span id="statCutout">Cutout: 8.2%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Preview -->
+    <section class="lg:col-span-7 bg-cardBg rounded-2xl border border-slate-800/90 shadow-2xl p-5 flex flex-col items-center justify-between min-h-[560px]">
+      <div class="w-full flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3.5 mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-semibold text-slate-200">Live Vector & Patch Viewport</span>
+          <span id="activeSourceBadge" class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">Live URL Mode</span>
+        </div>
+        <div class="inline-flex rounded-xl bg-slate-900 p-1 border border-slate-800">
+          <button id="view-btn-vector" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-500 text-slate-950 shadow transition">Pure Vector SVG</button>
+          <button id="view-btn-cap" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition">Khaki Cap Leather Patch Preview</button>
+          <button id="view-btn-card" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition">Business Card Mockup</button>
+          <button id="view-btn-sticker" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition">Die-Cut Sticker Mockup</button>
+        </div>
+      </div>
+
+      <div class="w-full flex-grow flex items-center justify-center py-2">
+        <div id="vectorStage" class="w-full max-w-[440px] aspect-square checkerboard rounded-2xl p-4 shadow-inner border border-slate-700/60 flex items-center justify-center relative">
+          <div id="svgContainer" class="w-full h-full flex items-center justify-center"></div>
+        </div>
+        <div id="capStage" class="w-full max-w-[460px] aspect-square rounded-2xl bg-[#9e824c] relative overflow-hidden shadow-2xl border-2 border-[#7c6334] hidden flex-col items-center justify-center p-6">
+          <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 50%); background-size: 6px 6px;"></div>
+          <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-8 bg-[#937742] border-x border-[#785f30] flex justify-between px-1.5">
+            <div class="h-full border-l-2 border-dashed border-slate-100/75"></div>
+            <div class="h-full border-r-2 border-dashed border-slate-100/75"></div>
+          </div>
+          <div class="absolute top-6 left-16 w-5 h-5 rounded-full bg-[#3a2e18] border-4 border-slate-100 shadow-inner"></div>
+          <div class="absolute top-6 right-16 w-5 h-5 rounded-full bg-[#3a2e18] border-4 border-slate-100 shadow-inner"></div>
+          <div class="absolute bottom-0 inset-x-0 h-12 bg-[#8c713e] border-t-2 border-[#6e572c] flex flex-col justify-around py-1.5">
+            <div class="w-full border-t border-dashed border-slate-100/60"></div>
+            <div class="w-full border-t border-dashed border-slate-100/60"></div>
+          </div>
+          <div class="absolute top-3 inset-x-3 flex justify-center gap-2 z-20">
+            <button id="cap-pos-right" class="px-2.5 py-1 text-[11px] font-semibold rounded-full bg-slate-900/80 text-amber-300 border border-amber-500/40 backdrop-blur">Right Front Panel</button>
+            <button id="cap-pos-center" class="px-2.5 py-1 text-[11px] font-semibold rounded-full bg-slate-900/60 text-slate-300 border border-slate-700 backdrop-blur">Center Over Seam</button>
+          </div>
+          <div id="capPatchHolder" class="relative z-10 w-48 h-48 rounded-full shadow-[0_12px_28px_rgba(0,0,0,0.6)] transition-all duration-300 translate-x-20 translate-y-2 flex items-center justify-center">
+            <div id="capSvgMirror" class="w-full h-full"></div>
+          </div>
+        </div>
+        <div id="cardStage" class="hidden w-full max-w-[640px] flex flex-col items-center justify-center gap-4">
+          <div id="cardStageContent" class="w-full flex justify-center"></div>
+          <p class="text-[11px] text-slate-400 text-center">Business card front shows QR; back (vCard mode) shows contact details.</p>
+        </div>
+        <div id="stickerStage" class="hidden w-full max-w-[440px] flex items-center justify-center">
+          <div id="stickerStageContent" class="w-full flex justify-center"></div>
+          <p class="text-[11px] text-slate-400 text-center">Die-cut sticker on vinyl backing with cut line.</p>
+        </div>
+      </div>
+
+      <div class="w-full pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
+        <div class="flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span><span>Test with your smartphone camera right on screen before sending the SVG to the laser shop.</span></div>
+        <span id="footerDataPreview" class="font-mono text-[11px] text-amber-400/90 truncate max-w-[240px]">https://example.com</span>
+      </div>
+    </section>
+  </main>
+
+  <canvas id="exportCanvas" width="1600" height="1600" class="hidden"></canvas>
+
+</body>
+</html>
